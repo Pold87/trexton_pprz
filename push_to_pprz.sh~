@@ -1,0 +1,2 @@
+cp trexton.c trexton.h ~/paparazzi/sw/airborne/modules/computer_vision/
+cp trexton.c ~/paparazzi/sw/airborne/modules/computer_vision/
