@@ -26,12 +26,71 @@
 #ifndef TREXTON_H
 #define TREXTON_H
 
+#include <stdio.h>
 #include "lib/vision/image.h"
 
-void extract_one_patch(struct image_t *img, double *patch, int x, int y, int patch_size);
-int label_image_patch(double *patch, double *textons[]);
+/* The video device */
+#ifndef TREXTON_DEVICE
+#define TREXTON_DEVICE /dev/video0      ///< The video device
+#endif
+
+/* The video device size (width, height) */
+#ifndef TREXTON_DEVICE_SIZE
+//#define TREXTON_DEVICE_SIZE 320,240     ///< The video device size (width, height)
+#define TREXTON_DEVICE_SIZE 1280, 720     ///< The video device size (width, height)
+#endif
+
+/* The video device buffers (the amount of V4L2 buffers) */
+#ifndef TREXTON_DEVICE_BUFFERS
+#define TREXTON_DEVICE_BUFFERS 15       ///< The video device buffers (the amount of V4L2 buffers)
+#endif
+
+#define TREXTON_DEBUG false
+
+#define VIEWVIDEO_HOST 192.168.1.255
+#define VIEWVIDEO_PORT_OUT 5000
+#define VIEWVIDEO_BROADCAST true
+
+/* Analysis */
+#define MEASURE_TIME true
+
+/* treXton settings */
+#define PATCH_SIZE  5
+#define TOTAL_PATCH_SIZE 25
+#define NUM_TEXTONS 33
+#define MAX_TEXTONS 300
+#define MAX_POSSIBLE_DIST 50000
+
+/* Maximum lines read from histogram CSV */
+#define NUM_HISTOGRAMS 5000
+#define NUM_CLASSES 4
+#define PREDICT true
+#define SAVE_HISTOGRAM false
+#define HISTOGRAM_PATH "camel.csv"
+
+
+void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
+uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
+
+void get_texton_histogram(struct image_t *img, int *texton_histogram);
+void make_histogram(uint8_t *texton_ids, int *texton_hist);
+void save_histogram(int *texton_hist, char *filename);
+
+uint8_t predict_class(int *texton_hist);
+
+double euclidean_dist(double x[], double y[], uint8_t s);
+double euclidean_dist_int(int x[], int y[], uint8_t s);
+
 extern void trexton_init(void);
 extern void trexton_periodic(void);
+
+/* A marker has a distance and an ID that can be mapped to its name */
+struct marker {
+
+  int id;
+  double dist;
+
+};
 
 #endif
 

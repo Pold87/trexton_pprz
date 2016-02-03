@@ -235,4 +235,4 @@ static void rtp_packet_send(
   memcpy(&RtpBuf[20], Jpeg, JpegLen);
 
   udp_socket_send_dontwait(udp, RtpBuf, RtpPacketSize);
-};
+}
