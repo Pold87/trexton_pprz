@@ -62,11 +62,28 @@
 #define MAX_POSSIBLE_DIST 50000
 
 /* Maximum lines read from histogram CSV */
-#define NUM_HISTOGRAMS 5000
+#define NUM_HISTOGRAMS 800
 #define NUM_CLASSES 4
 #define PREDICT true
 #define SAVE_HISTOGRAM false
 #define HISTOGRAM_PATH "camel.csv"
+
+
+static struct v4l2_device *trexton_dev; /* The trexton camera V4L2 device */
+static struct UdpSocket video_sock; /* UDP socket for sending RTP video */
+/* Total patch size is width of patch times height of patch */
+static uint8_t patch_size = PATCH_SIZE;
+static uint8_t total_patch_size = 25; //pow(patch_size, 2);
+static char *filename = "textons.csv";
+static double textons[NUM_TEXTONS][TOTAL_PATCH_SIZE];
+static int knn = 5;
+
+/* TODO: see if static is necessary here */
+int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
+
+//static int targets[1000]; /* targets for classifier (machine learning)*/
+static char *classes[] = {"firefox", "logitech", "linux", "camel"};
+static char training_data_path[] = "training_data/";
 
 
 void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
@@ -78,8 +95,8 @@ void save_histogram(int *texton_hist, char *filename);
 
 uint8_t predict_class(int *texton_hist);
 
-double euclidean_dist(double x[], double y[], uint8_t s);
-double euclidean_dist_int(int x[], int y[], uint8_t s);
+double euclidean_dist(double x[], double y[], int s);
+double euclidean_dist_int(int x[], int y[], int s);
 
 extern void trexton_init(void);
 extern void trexton_periodic(void);
@@ -93,5 +110,3 @@ struct marker {
 };
 
 #endif
-
-#

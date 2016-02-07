@@ -43,22 +43,6 @@
 #include "lib/encoding/rtp.h"
 #include "udp_socket.h"
 
-static struct v4l2_device *trexton_dev; /* The trexton camera V4L2 device */
-static struct UdpSocket video_sock; /* UDP socket for sending RTP video */
-/* Total patch size is width of patch times height of patch */
-static uint8_t patch_size = PATCH_SIZE;
-static uint8_t total_patch_size = 25; //pow(patch_size, 2);
-static char *filename = "textons.csv";
-static double textons[NUM_TEXTONS][TOTAL_PATCH_SIZE];
-static int knn = 5;
-
-/* TODO: see if static is necessary here */
-int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
-
-//static int targets[1000]; /* targets for classifier (machine learning)*/
-static char *classes[] = {"firefox", "logitech", "linux", "camel"};
-static char training_data_path[] = "training_data/";
-
 void trexton_init() {
 
   //gps_impl_init();
@@ -208,7 +192,7 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
     srand (time(NULL));
 
     /* Extract image patches */
-    uint8_t i;
+    int i;
     for (i = 0; i < MAX_TEXTONS; i++) {
 
       /* Extract random locations of patchsize x patchsize */      
@@ -245,7 +229,7 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
 
 
 /* Calculate Euclidean distance between two double arrays */
-double euclidean_dist(double x[], double y[], uint8_t s)
+double euclidean_dist(double x[], double y[], int s)
 {
   double sum = 0;
   double dist;
@@ -259,7 +243,7 @@ double euclidean_dist(double x[], double y[], uint8_t s)
 }
 
 
-double euclidean_dist_int(int x[], int y[], uint8_t s)
+double euclidean_dist_int(int x[], int y[], int s)
 {
   double sum = 0;
   double dist;
@@ -333,7 +317,7 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
 /* Create a histogram showing the frequency of values in an array */
 void make_histogram(uint8_t *texton_ids, int *texton_hist) {
 
-  uint8_t i = 0;
+  int i = 0;
   for (i = 0; i < MAX_TEXTONS; i++) {
       texton_hist[texton_ids[i]] += 1;
     }

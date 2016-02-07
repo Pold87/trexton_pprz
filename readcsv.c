@@ -2,12 +2,14 @@
 #include "trexton.h"
 #include "csv.h"
 #include <errno.h>
+#include <math.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "lib/vision/image.h"
 
+#define CSV_APPEND_NULL 8 /* Ensure that all fields are null-ternimated */
 
 static int width = 0;
 static int row = 0;
@@ -19,11 +21,20 @@ void cb_write_to_int_arr(void *s, size_t i, void *arr) {
 
   /* Save in texton array */
   int* int_arr = (int*) arr;
-  
-  printf("row is: %d, col is: %d pos is %d\n", row, col, row * width + col);
+  unsigned char *str = s;
+
+  /* Convert string to int */
+  size_t j;
+  int acc = 0;
+  for (j = 0; j < i; j++) {
+    acc = acc * 10;
+    acc += str[j] - '0';
+ }
+
+  //  printf("row is: %d, col is: %d pos is %d num is: %d\n", row, col, row * width + col, acc);
   fflush(stdout);
   if (max_lines > 0)
-    int_arr[row * width + col] = atoi(s);
+    int_arr[row * width + col] = acc;
   col++;
 }
 
@@ -55,12 +66,11 @@ uint8_t read_csv_into_array(void *array, char *filename, void (*cb)(void *, size
   struct csv_parser p;
   
   size_t i;
-  char c;
   csv_init(&p, 0);
 
   /* Read input CSV file */
   FILE *infile;
-  printf("%s", filename);
+  printf("[read_csv_into_array] filename: %s\n", filename);
   infile = fopen(filename, "rb");
 
   /* Check if CSV file exists */
