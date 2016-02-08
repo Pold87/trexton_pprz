@@ -1,4 +1,5 @@
 #include "texton_settings.h"
+#include "texton_helpers.h"
 #include "trexton_regression.h"
 #include <stdio.h>
 
@@ -12,6 +13,7 @@
 /* static char histogram_filename[] = "regression_histograms.csv"; */
 static char histogram_filename[] = "training_data/logitech.csv";
 static int histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
+static char *classes[] = {"firefox", "logitech", "linux", "camel"};
 
 void trexton_init() {
 
@@ -52,7 +54,23 @@ void trexton_init() {
    frequency of 30 Hz*/
 void trexton_periodic() {
 
-   printf("hello");
+ /* Get the image from the camera */
+ struct image_t img;
+ v4l2_image_get(trexton_dev, &img);
+
+ /* Calculate the texton histogram -- that is the frequency of
+    characteristic image patches -- for this image */
+ int texton_histogram[NUM_TEXTONS] = {0};
+ get_texton_histogram(&img, texton_histogram);
+
+ #if PREDICT
+   struct position pos;
+   pos = predict_position(texton_histogram);
+   printf("predicted position is: x: %f, y: %f\n\n", pos.x, pos.y);
+ #endif
+
+  /* Free the image */
+  v4l2_image_free(trexton_dev, &img);
 
 }
 

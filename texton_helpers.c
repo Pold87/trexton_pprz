@@ -31,24 +31,6 @@
 #include "lib/encoding/rtp.h"
 #include "udp_socket.h"
 
-/* TODO: see if static is necessary here */
-int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
-
-//static int targets[1000]; /* targets for classifier (machine learning)*/
-static char *classes[] = {"firefox", "logitech", "linux", "camel"};
-static char training_data_path[] = "training_data/";
-
-
-/* A marker has a distance and an ID that can be mapped to its name */
-struct marker {
-
-  int id;
-  double dist;
-
-};
-
-
-
 /* Calculate Euclidean distance between two double arrays */
 double euclidean_dist(double x[], double y[], int s)
 {
@@ -239,88 +221,18 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
 }
 
 
+/**
+ * Predict the x, y position of the UAV using the texton histogram.
+ *
+ * @param texton_hist The texton histogram
+ *
+ * @return The x, y, position of the MAV, computed by means of the input histogram
+ */
+struct position predict_position(int *texton_hist) {
 
-int marker_comp (const struct marker *elem1, const struct marker *elem2)
-{
-  double f = elem1->dist;
-  double s =  elem2->dist;
-  if (f > s) return 1;
-  if (f < s) return -1;
-  return 0;
-}
+  struct position pos;
+  pos.x = 200;
+  pos.y = 300;
 
-
-uint8_t predict_class(int *texton_hist){
-
-  int h = 0, class_i = 0, j = 0;
-
-  struct marker markers[NUM_CLASSES * NUM_HISTOGRAMS];
-
-    /* Iterate over classes (e.g. firefox, camel, ...) and save distances */
-    uint8_t c = 0;
-    double dist;
-    double min_dists[NUM_CLASSES];
-
-    for (c = 0; c < NUM_CLASSES; c++) {
-      min_dists[c] = MAX_POSSIBLE_DIST;
-      /* Compare current texton histogram to all saved histograms for
-   a certain class */
-      for (h = 0; h < NUM_HISTOGRAMS; h++) {
-  dist = euclidean_dist_int(texton_hist, histograms[c][h], NUM_TEXTONS);
-
-  /* Create marker */
-  struct marker m;
-  m.id = c;
-  m.dist = dist;
-  markers[j] = m;
-
-  //printf("%s: %f\n", classes[c], dist);
-  if (dist <= min_dists[c])
-    min_dists[c] = dist;
-
-  j++;
-      }
-    }
-
-    /* Sort distances */
-    qsort(markers, sizeof(markers) / sizeof(*markers), sizeof(*markers), marker_comp);
-
-    printf("marker1: %d marker2: %d marker3: %d\n", markers[0].id, markers[1].id, markers[2].id);
-    printf("marker1: %s %f marker2: %s %f marker3: %s %f\n", classes[markers[0].id], markers[0].dist,
-     classes[markers[1].id], markers[1].dist,
-     classes[markers[2].id], markers[2].dist);
-
-
-    int use_only_nearest = 0;
-    if (use_only_nearest) {
-      double min_dist_all_classes = MAX_POSSIBLE_DIST;
-      for (c = 0; c < NUM_CLASSES; c++) {
-
-  /* Print distance for each class */
-  printf("%s: %f\n", classes[c], min_dists[c]);
-
-  if (min_dists[c] < min_dist_all_classes) {
-    class_i = c;
-    min_dist_all_classes = min_dists[c];
-  }
-      }
-      printf("\n");
-    } else if (knn) {
-
-      /* Determine frequency of each neighbor */
-      int k = 0;
-      int nearest_markers[NUM_CLASSES] = {0};
-      for (k = 0; k < knn; k++) {
-  struct marker current_marker = markers[k];
-  /* Increase counter for this marker */
-  nearest_markers[current_marker.id]++;
-      }
-
-      /* Find arg max (that is, the neighbor with the highest
-   frequency) */
-      class_i = arg_max(nearest_markers, NUM_CLASSES);
-    }
-
-    return class_i;
-
+  return pos;
 }

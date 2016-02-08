@@ -30,6 +30,22 @@
 #include "texton_settings.h"
 
 
+/* A marker has a distance and an ID that can be mapped to its name */
+struct marker {
+
+  int id;
+  double dist;
+
+};
+
+/* A position has a x and y coordinate */
+struct position {
+
+double x;
+double y;
+
+};
+
 double euclidean_dist(double x[], double y[], int s);
 double euclidean_dist_int(int x[], int y[], int s);
 
@@ -58,3 +74,4 @@ void make_histogram(uint8_t *texton_ids, int *texton_hist);
 void save_histogram(int *texton_hist, char *filename);
 uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
 uint8_t predict_class(int *texton_hist);
+struct position predict_position(int *texton_hist);

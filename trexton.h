@@ -30,15 +30,6 @@
 #include <stdio.h>
 #include "lib/vision/image.h"
 
-
-/* TODO: see if static is necessary here */
-int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
-
-//static int targets[1000]; /* targets for classifier (machine learning)*/
-static char *classes[] = {"firefox", "logitech", "linux", "camel"};
-static char training_data_path[] = "training_data/";
-
-
 void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
 uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
 
@@ -53,13 +44,5 @@ double euclidean_dist_int(int x[], int y[], int s);
 
 extern void trexton_init(void);
 extern void trexton_periodic(void);
-
-/* A marker has a distance and an ID that can be mapped to its name */
-struct marker {
-
-  int id;
-  double dist;
-
-};
 
 #endif
