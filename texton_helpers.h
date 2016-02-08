@@ -17,49 +17,44 @@
  * along with paparazzi; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+
 /**
- * @file "modules/trexton/trexton.h"
+ * @file "modules/trexton/trexton_helpers.h"
  * @author Volker Strobel
- * treXton localization
+ * treXton regression localization
  */
 
-#ifndef TREXTON_H
-#define TREXTON_H
 
-#include "texton_settings.h"
 #include <stdio.h>
 #include "lib/vision/image.h"
+#include "texton_settings.h"
 
-
-/* TODO: see if static is necessary here */
-int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
-
-//static int targets[1000]; /* targets for classifier (machine learning)*/
-static char *classes[] = {"firefox", "logitech", "linux", "camel"};
-static char training_data_path[] = "training_data/";
-
-
-void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
-uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
-
-void get_texton_histogram(struct image_t *img, int *texton_histogram);
-void make_histogram(uint8_t *texton_ids, int *texton_hist);
-void save_histogram(int *texton_hist, char *filename);
-
-uint8_t predict_class(int *texton_hist);
 
 double euclidean_dist(double x[], double y[], int s);
 double euclidean_dist_int(int x[], int y[], int s);
 
-extern void trexton_init(void);
-extern void trexton_periodic(void);
+/**
+*
+ * Find the arg maximum of an integer array
+ * @param arr An integer array
+ * @param size Size of the integer array
+ *
+ * @return Index of the maximum of the array
+ */
+int arg_max(int arr[], int size);
 
-/* A marker has a distance and an ID that can be mapped to its name */
-struct marker {
-
-  int id;
-  double dist;
-
-};
-
-#endif
+/**
+ * \brief Find the maximum of an integer array
+ *
+ * @param arr An integer array
+ * @param size Size of the integer array
+ *
+ * @return Maximum of the array
+ */
+int max(int arr[], int size);
+void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
+void get_texton_histogram(struct image_t *img, int *texton_histogram);
+void make_histogram(uint8_t *texton_ids, int *texton_hist);
+void save_histogram(int *texton_hist, char *filename);
+uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
+uint8_t predict_class(int *texton_hist);

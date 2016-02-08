@@ -18,24 +18,21 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/trexton/trexton.h"
+ * @file "modules/trexton/trexton.regression.h"
  * @author Volker Strobel
- * treXton localization
+ * treXton regression localization
  */
 
-#ifndef TREXTON_H
-#define TREXTON_H
+#ifndef TREXTON_REG_H
+#define TREXTON_REG_H
 
-#include "texton_settings.h"
 #include <stdio.h>
+#include "texton_settings.h"
 #include "lib/vision/image.h"
 
-
-/* TODO: see if static is necessary here */
-int histograms[NUM_CLASSES][NUM_HISTOGRAMS][NUM_TEXTONS];
+static int histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
 
 //static int targets[1000]; /* targets for classifier (machine learning)*/
-static char *classes[] = {"firefox", "logitech", "linux", "camel"};
 static char training_data_path[] = "training_data/";
 
 
@@ -54,12 +51,5 @@ double euclidean_dist_int(int x[], int y[], int s);
 extern void trexton_init(void);
 extern void trexton_periodic(void);
 
-/* A marker has a distance and an ID that can be mapped to its name */
-struct marker {
-
-  int id;
-  double dist;
-
-};
 
 #endif
