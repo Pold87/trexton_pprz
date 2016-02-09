@@ -41,8 +41,9 @@ struct marker {
 /* A position has a x and y coordinate */
 struct position {
 
-double x;
-double y;
+  double x;
+  double y;
+  double dist; /* Distance to the current histogram */
 
 };
 
@@ -69,9 +70,11 @@ int arg_max(int arr[], int size);
  */
 int max(int arr[], int size);
 void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
-void get_texton_histogram(struct image_t *img, int *texton_histogram);
+void get_texton_histogram(struct image_t *img, int *texton_histogram, double textons[][TOTAL_PATCH_SIZE]);
 void make_histogram(uint8_t *texton_ids, int *texton_hist);
 void save_histogram(int *texton_hist, char *filename);
 uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
 uint8_t predict_class(int *texton_hist);
 struct position predict_position(int *texton_hist);
+int position_comp (const struct position *elem1, const struct position *elem2);
+void save_image(struct image_t *img);

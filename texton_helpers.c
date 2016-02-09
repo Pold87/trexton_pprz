@@ -51,11 +51,16 @@ double euclidean_dist_int(int x[], int y[], int s)
   double sum = 0;
   double dist;
   uint8_t i;
+
+
   for(i = 0; i < s; i++)
     {
+      /* printf("Regression histograms: first %d second %d\n", x[i], y[i]); */
       sum += pow((x[i] - y[i]), 2.0);
     }
       dist = sqrt(sum);
+
+  /* printf("Euclidean dist %f \n", dist); */
   return dist;
 }
 
@@ -88,6 +93,27 @@ int max(int arr[], int size){
 }
 
 
+void save_image(struct image_t *img) {
+
+  int i;
+
+  /* Get image buffer */
+  uint8_t *buf = img->buf;
+
+  FILE *fp = fopen("myimage.csv", "w");
+  
+  for (i = 0; i < 1280 * 720 * 2; i += 2) {
+
+    fprintf(fp, "%d", (int) buf[i]);
+    if (i % (1280 * 2) != 0 || i == 0)
+      fprintf(fp, ",");
+    if (i % (1280 * 2) == 0 && i != 0)
+      fprintf(fp, "\n");
+  }
+
+  fclose(fp);
+}
+
 /* Extract an image patch of size 'patch_size' (for example, 5 x 5)
    and fill 'patch' with the flattened patch */
 void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size)
@@ -99,7 +125,7 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
   uint8_t *buf = img->buf;
 
   /* position of x, y */
-  int pos =  (x + (img->w * y)) * 2 - 1;
+  int pos =  (x + (img->w * y)) * 2;
 
   /* Extract patches  */
   for (int i = 0; i < total_patch_size; i++) {
@@ -108,15 +134,22 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
     patch[i] = buf[pos];
 
     /* Check, if texton extraction should continue in a new line */
-    if ((i + 1) % patch_size == 0)
+    if (i % patch_size == 0 && i != 0)
       pos += ((img->h * 2) - (patch_size * 2));
     else
       pos += 2; /* +2 due to YUYV */
   }
+
+  /* int i; */
+  /* for (i = 0; i < total_patch_size; i++) { */
+  /*   printf("patch is %f\n", patch[i]); */
+  /* } */
+
+
 }
 
 /* Get the texton histogram of an image */
- void get_texton_histogram(struct image_t *img, int *texton_histogram) {
+void get_texton_histogram(struct image_t *img, int *texton_histogram, double textons[][TOTAL_PATCH_SIZE]) {
 
     uint8_t texton_ids[MAX_TEXTONS]; /*  texton IDs */
     double patch[total_patch_size];
@@ -210,7 +243,6 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
   int i;
   for (i = 0; i < num_textons; i++) {
     dist = euclidean_dist(patch, textons[i], total_patch_size);
-    /* printf("dist is %f\n", dist); */
 
     if (dist < min_dist) {
       min_dist = dist;
@@ -220,19 +252,11 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
   return id;
 }
 
-
-/**
- * Predict the x, y position of the UAV using the texton histogram.
- *
- * @param texton_hist The texton histogram
- *
- * @return The x, y, position of the MAV, computed by means of the input histogram
- */
-struct position predict_position(int *texton_hist) {
-
-  struct position pos;
-  pos.x = 200;
-  pos.y = 300;
-
-  return pos;
+int position_comp (const struct position *elem1, const struct position *elem2)
+{
+  double f = elem1->dist;
+  double s =  elem2->dist;
+  if (f > s) return 1;
+  if (f < s) return -1;
+  return 0;
 }

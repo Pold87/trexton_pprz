@@ -57,7 +57,7 @@ void trexton_init() {
   //gps_impl_init();
 
   /* Get textons -- that is the clustering centers */
-  read_textons_from_csv(*textons, filename);
+  read_textons_from_csv(*textons, texton_filename);
 
   #if PREDICT
 
@@ -134,7 +134,7 @@ void trexton_periodic() {
   /* Calculate the texton histogram -- that is the frequency of
   characteristic image patches -- for this image */
   int texton_histogram[NUM_TEXTONS] = {0};
-  get_texton_histogram(&img, texton_histogram);
+  get_texton_histogram(&img, texton_histogram, textons);
 
   #if SAVE_HISTOGRAM
     save_histogram(texton_histogram, HISTOGRAM_PATH);

@@ -10,4 +10,4 @@ run:
 	./trexton_regression
 
 clean:
-	rm *.o trexton_pprz trexton_regression
+	rm trexton_pprz trexton_regression

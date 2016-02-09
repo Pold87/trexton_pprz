@@ -35,18 +35,7 @@ static int histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
 //static int targets[1000]; /* targets for classifier (machine learning)*/
 static char training_data_path[] = "training_data/";
 
-
-void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size);
-uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
-
-void get_texton_histogram(struct image_t *img, int *texton_histogram);
-void make_histogram(uint8_t *texton_ids, int *texton_hist);
-void save_histogram(int *texton_hist, char *filename);
-
 uint8_t predict_class(int *texton_hist);
-
-double euclidean_dist(double x[], double y[], int s);
-double euclidean_dist_int(int x[], int y[], int s);
 
 extern void trexton_init(void);
 extern void trexton_periodic(void);

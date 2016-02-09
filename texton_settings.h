@@ -27,7 +27,7 @@
 
 /* The video device */
 #ifndef TREXTON_DEVICE
-#define TREXTON_DEVICE /dev/video0      ///< The video device
+#define TREXTON_DEVICE /dev/video1      ///< The video device
 #endif
 
 /* The video device size (width, height) */
@@ -58,19 +58,19 @@
 #define MAX_POSSIBLE_DIST 50000
 
 /* Maximum lines read from histogram CSV */
-#define NUM_HISTOGRAMS 800
+#define NUM_HISTOGRAMS 100
 #define NUM_CLASSES 4
 #define PREDICT true
 #define SAVE_HISTOGRAM false
-#define HISTOGRAM_PATH "camel.csv"
+#define HISTOGRAM_PATH "regression_recorded.csv"
 
 static struct v4l2_device *trexton_dev; /* The trexton camera V4L2 device */
 static struct UdpSocket video_sock; /* UDP socket for sending RTP video */
 /* Total patch size is width of patch times height of patch */
 static uint8_t patch_size = PATCH_SIZE;
 static uint8_t total_patch_size = 25; //pow(patch_size, 2);
-static char *filename = "textons.csv";
-static double textons[NUM_TEXTONS][TOTAL_PATCH_SIZE];
+static char *texton_filename = "textons.csv";
+double textons[NUM_TEXTONS][TOTAL_PATCH_SIZE];
 static int knn = 5;
 
 

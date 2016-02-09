@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include "lib/vision/image.h"
 
+#include "texton_helpers.h"
+
 #define CSV_APPEND_NULL 8 /* Ensure that all fields are null-ternimated */
 
 static int width = 0;
@@ -44,6 +46,30 @@ void cb_write_to_double_arr(void *s, size_t i, void *arr) {
   double* double_arr = (double*) arr;
   if (max_lines > 0)
     double_arr[row * width + col] = atof(s);
+  col++;
+}
+
+
+void cb_write_to_position_arr(void *s, size_t i, void *arr) {
+
+  /* Skip header */
+  if (row == 0)
+    return;
+
+  /* Save in texton array */
+  struct position* pos_arr = (struct position*) arr;
+  if (max_lines > 0) {
+    
+    /* the first column has the x coordinate */
+    /* it is row - 1 because the header was skipped */
+    if (col == 1)
+    pos_arr[row - 1].x = atof(s);
+
+    /* and the second one the y coordinate */
+    if (col == 2)
+    pos_arr[row - 1].y = atof(s);
+
+  }
   col++;
 }
 
@@ -116,6 +142,18 @@ uint8_t read_textons_from_csv(double *textons, char *filename) {
   max_lines = NUM_HISTOGRAMS;
   width = NUM_TEXTONS;
   uint8_t r = read_csv_into_array(histograms, filename, cb_write_to_int_arr);
+
+  return r;
+
+ }
+
+ uint8_t read_positions_from_csv(struct position *positions, char *filename) {
+   
+  printf("[read_positions_from_csv] filename is \n%s\n", filename);
+  fflush(stdout); // Prints to screen or whatever your standard out is
+  max_lines = NUM_HISTOGRAMS;
+  width = 3; /* CSV header is id, x, y */
+  uint8_t r = read_csv_into_array(positions, filename, cb_write_to_position_arr);
 
   return r;
 
