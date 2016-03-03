@@ -147,6 +147,19 @@ uint8_t read_textons_from_csv(double *textons, char *filename) {
 
  }
 
+uint8_t read_test_histograms_from_csv(int *histograms, char *filename) {
+   
+  printf("\n%s\n", filename);
+  fflush(stdout); // Prints to screen or whatever your standard out is
+  max_lines = NUM_TEST_HISTOGRAMS;
+  width = NUM_TEXTONS;
+  uint8_t r = read_csv_into_array(histograms, filename, cb_write_to_int_arr);
+
+  return r;
+
+}
+
+
  uint8_t read_positions_from_csv(struct position *positions, char *filename) {
    
   printf("[read_positions_from_csv] filename is \n%s\n", filename);

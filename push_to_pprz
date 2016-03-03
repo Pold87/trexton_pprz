@@ -4,5 +4,13 @@
 cp ~/paparazzi/sw/airborne/modules/computer_vision/trexton.c ~/paparazzi/sw/airborne/modules/computer_vision/trexton.h ~/paparazzi/sw/airborne/modules/computer_vision/backup
 
 # Push to paparazzi
-cp trexton.c trexton.h readcsv.c readcsv.h ../treXton/foo.csv ~/paparazzi/sw/airborne/modules/computer_vision/
+cp trexton.c trexton.h readcsv.c readcsv.h ../treXton/foo.csv trexton_regression.c trexton_regression.h texton_settings.h texton_helpers.c texton_helpers.h ~/paparazzi/sw/airborne/modules/computer_vision/
+
+
+# Particle Filter
+cp -r ../particle_filter/src/ ~/paparazzi/sw/airborne/modules/particle_filter/src/
+
+
+cp -r opticflow ~/paparazzi/sw/airborne/modules/computer_vision
+
 

@@ -23,17 +23,18 @@
 
 #include <stdio.h>
 #include "lib/vision/image.h"
+#include "udp_socket.h"
 
 
 /* The video device */
 #ifndef TREXTON_DEVICE
-#define TREXTON_DEVICE /dev/video1      ///< The video device
+#define TREXTON_DEVICE /dev/video2      ///< The video device
 #endif
 
 /* The video device size (width, height) */
 #ifndef TREXTON_DEVICE_SIZE
-//#define TREXTON_DEVICE_SIZE 320,240     ///< The video device size (width, height)
-#define TREXTON_DEVICE_SIZE 1280, 720     ///< The video device size (width, height)
+#define TREXTON_DEVICE_SIZE 320,240     ///< The video device size (width, height)
+/* #define TREXTON_DEVICE_SIZE 1280, 720     ///< The video device size (width, height) */
 #endif
 
 /* The video device buffers (the amount of V4L2 buffers) */
@@ -58,11 +59,13 @@
 #define MAX_POSSIBLE_DIST 50000
 
 /* Maximum lines read from histogram CSV */
-#define NUM_HISTOGRAMS 100
+#define NUM_HISTOGRAMS 585
 #define NUM_CLASSES 4
 #define PREDICT true
+#define EVALUATE false
+#define NUM_TEST_HISTOGRAMS 388
 #define SAVE_HISTOGRAM false
-#define HISTOGRAM_PATH "regression_recorded.csv"
+#define HISTOGRAM_PATH "../treXton/saved.csv"
 
 static struct v4l2_device *trexton_dev; /* The trexton camera V4L2 device */
 static struct UdpSocket video_sock; /* UDP socket for sending RTP video */

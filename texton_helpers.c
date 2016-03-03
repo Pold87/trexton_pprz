@@ -119,7 +119,7 @@ void save_image(struct image_t *img) {
 void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y, uint8_t patch_size)
 {
 
-  uint8_t total_patch_size = pow(patch_size, 2);
+  int total_patch_size = pow(patch_size, 2);
 
   /* Get image buffer */
   uint8_t *buf = img->buf;
@@ -164,15 +164,15 @@ void get_texton_histogram(struct image_t *img, int *texton_histogram, double tex
     for (i = 0; i < MAX_TEXTONS; i++) {
 
       /* Extract random locations of patchsize x patchsize */
-      uint8_t max_x = img->w - patch_size;
-      uint8_t max_y = img->h - patch_size;
+      int max_x = img->w - patch_size;
+      int max_y = img->h - patch_size;
 
-      uint8_t rand_x = rand();
-      uint8_t rand_y = rand();
+      int rand_x = rand();
+      int rand_y = rand();
 
       /* int between 0 and max - 1 */
-      uint8_t x = rand_x % max_x;
-      uint8_t y = rand_y % max_y;
+      int x = rand_x % max_x;
+      int y = rand_y % max_y;
 
       extract_one_patch(img, patch, x, y, patch_size);
 
@@ -252,7 +252,7 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
   return id;
 }
 
-int position_comp (const struct position *elem1, const struct position *elem2)
+int measurement_comp (const struct measurement *elem1, const struct measurement *elem2)
 {
   double f = elem1->dist;
   double s =  elem2->dist;

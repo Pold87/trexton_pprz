@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include "lib/vision/image.h"
 #include "texton_settings.h"
+#include "../particle_filter/src/particle_filter.h"
 
 
 /* A marker has a distance and an ID that can be mapped to its name */
@@ -75,6 +76,6 @@ void make_histogram(uint8_t *texton_ids, int *texton_hist);
 void save_histogram(int *texton_hist, char *filename);
 uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
 uint8_t predict_class(int *texton_hist);
-struct position predict_position(int *texton_hist);
-int position_comp (const struct position *elem1, const struct position *elem2);
+struct measurement predict_position(int *texton_hist);
+int measurement_comp (const struct measurement *elem1, const struct measurement *elem2);
 void save_image(struct image_t *img);
