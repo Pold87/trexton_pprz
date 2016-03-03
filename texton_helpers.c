@@ -101,13 +101,21 @@ void save_image(struct image_t *img) {
   uint8_t *buf = img->buf;
 
   FILE *fp = fopen("myimage.csv", "w");
-  
-  for (i = 0; i < 1280 * 720 * 2; i += 2) {
+
+  uint32_t interlace;
+  if (img->type == IMAGE_GRAYSCALE)
+     interlace = 1;
+  else if (img->type == IMAGE_YUV422)
+     interlace = 2;
+  else
+     printf("[save_image] No image type specified");
+
+  for (i = 0; i < img->w * img->h * interlace; i += interlace) {
 
     fprintf(fp, "%d", (int) buf[i]);
-    if (i % (1280 * 2) != 0 || i == 0)
+    if (i % (img->w * interlace) != 0 || i == 0)
       fprintf(fp, ",");
-    if (i % (1280 * 2) == 0 && i != 0)
+    if (i % (img->w * interlace) == 0 && i != 0)
       fprintf(fp, "\n");
   }
 
@@ -125,7 +133,18 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
   uint8_t *buf = img->buf;
 
   /* position of x, y */
-  int pos =  (x + (img->w * y)) * 2;
+  uint8_t interlace;
+  if (img->type == IMAGE_GRAYSCALE) {
+    interlace = 1;
+  } else {
+    if (img->type == IMAGE_YUV422) {
+      interlace = 2;
+    } else
+       while (1);   // hang to show user something isn't right
+  }
+
+
+  int pos =  (x + (img->w * y)) * interlace;
 
   /* Extract patches  */
   for (int i = 0; i < total_patch_size; i++) {
@@ -135,9 +154,9 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
 
     /* Check, if texton extraction should continue in a new line */
     if (i % patch_size == 0 && i != 0)
-      pos += ((img->h * 2) - (patch_size * 2));
+      pos += ((img->h * interlace) - (patch_size * interlace));
     else
-      pos += 2; /* +2 due to YUYV */
+      pos += interlace; /* +2 due to YUYV */
   }
 
   /* int i; */

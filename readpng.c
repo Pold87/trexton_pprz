@@ -70,42 +70,39 @@ void read_png_file(char *filename, struct image_t *img) {
   png=NULL;
   info=NULL;
 
-  uint8_t buf[640 * 480];
+  uint8_t buf[width * height];
 
   for(int y = 0; y < height; y++) {
     png_bytep row = row_pointers[y];
-    
+
     for(int x = 0; x < width; x++) {
       png_bytep px = &(row[x * 4]);
-      
+
       int Y;
       Y = (6969 * px[0] + 23434 * px[1] + 2365 * px[2])/32768;
-      
+
       buf[y * width + x] = Y;
 
     }
-
   }
-
-
 
   // Set the image
   img->type = IMAGE_GRAYSCALE;
-  img->w = 320;
-  img->h = 240;
+  img->w = width;
+  img->h = height;
   img->buf_idx = 0;
-  img->buf_size = 640 * 480;
+  img->buf_size = width * height;
   img->buf = buf;
 
   fclose(fp);
 }
 
-/* void write_to_buffer(uint8_t *buf) { */
+/* void write_to_file(struct image_t *img) { */
 
-  
-/*   for(int y = 0; y < ; y++) { */
+
+/*   for(int y = 0; y < img->h; y++) { */
 /*     png_bytep row = row_pointers[y]; */
-/*     for(int x = 0; x < width; x++) { */
+/*     for(int x = 0; x < img->w; x++) { */
 /*       png_bytep px = &(row[x * 4]); */
 
 /*       int Y; */
@@ -113,7 +110,7 @@ void read_png_file(char *filename, struct image_t *img) {
 
 /*       fprintf(fp_out, "%d", Y); */
 /*       if (x != width -1) */
-/* 	fprintf(fp_out, ","); */
+/*   fprintf(fp_out, ","); */
 
 /*       // Do something awesome for each pixel here... */
 /*       //printf("%4d, %4d = RGBA(%3d, %3d, %3d, %3d)\n", x, y, px[0], px[1], px[2], px[3]); */

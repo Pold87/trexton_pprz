@@ -35,7 +35,9 @@ struct opticflow_t opticflow;                      ///< Opticflow calculations
 static struct opticflow_result_t opticflow_result; ///< The opticflow result
 static struct opticflow_state_t opticflow_state;   ///< State of the drone to communicate with the opticflow
 static pthread_mutex_t opticflow_mutex;            ///< Mutex lock fo thread safety
-static bool_t opticflow_got_result;                ///< When we have an optical flow calculation
+static bool_t opticflow_got_result; ///< When we have an optical flow calculation
+
+static int image_num = 0;
 
 void trexton_init() {
 
@@ -52,8 +54,7 @@ void trexton_init() {
   opticflow_state.agl = 0;
 
   // Initialize the opticflow calculation
-  opticflow_calc_init(&opticflow, 320, 240);
-
+  opticflow_calc_init(&opticflow, TREXTON_DEVICE_SIZE);
 
   opticflow_got_result = FALSE;
 
@@ -65,7 +66,7 @@ void trexton_init() {
 
   #if EVALUATE
     read_test_histograms_from_csv(histograms_testset, histogram_filename_testset);
-    
+
    /* Write header for predictions file*/
     remove("predictions.csv");
     FILE *fp_predictions;
@@ -85,6 +86,7 @@ void trexton_init() {
     /* } */
 
 
+  #if USE_WEBCAM
   /* Initialize the video device */
   trexton_dev = v4l2_init(STRINGIFY(TREXTON_DEVICE),
       TREXTON_DEVICE_SIZE,
@@ -105,6 +107,7 @@ void trexton_init() {
           -1,
           VIEWVIDEO_BROADCAST);
   #endif
+  #endif
 
 }
 
@@ -122,14 +125,25 @@ void trexton_periodic() {
     /* Get the image from the camera */
     struct image_t img;
     /* v4l2_image_get(trexton_dev, &img); */
-    read_png_file("b.png", &img);
+
+    char image_path[256];
+    sprintf(image_path, "../datasets/board_test/%d.png", image_num);
+
+    /* image_path = "../datasets/board_test/1.png" */
+
+    printf("%s", image_path);
+    fflush(stdout);
+
+
+
+    read_png_file(image_path, &img);
     /* save_image(&img); */
-    
+
   /* Get image buffer */
   uint8_t *buf = img.buf;
 
     printf("\nImage at pos 0 is %d\n", buf[0]);
-    
+
     int texton_histogram[NUM_TEXTONS] = {0};
     get_texton_histogram(&img, texton_histogram, textons);
 
@@ -169,7 +183,7 @@ void trexton_periodic() {
     struct opticflow_result_t temp_result;
 
     edgeflow_calc_frame(&opticflow, &temp_state, &img, &temp_result);
-   printf("\nresult: %d\n", temp_result.flow_x);
+    printf("\n edgeflow result: x:%d y:%d\n", temp_result.flow_x, temp_result.flow_y);
 // Copy the result if finished
     pthread_mutex_lock(&opticflow_mutex);
     memcpy(&opticflow_result, &temp_result, sizeof(struct opticflow_result_t));
@@ -196,15 +210,19 @@ void trexton_periodic() {
  #endif
 
    current_test_histogram++;
-   
+
   #if !EVALUATE
   /* Free the image */
+
+   #if USE_WEBCAM
   v4l2_image_free(trexton_dev, &img);
-  printf("Freed");
-  fflush(stdout);
-  
+  #endif
+
 
   #endif
+
+  image_num = image_num + 1;
+
 }
 
 
@@ -219,7 +237,7 @@ struct measurement predict_position(int *texton_hist) {
 
   int h = 0; /* Histogram iterator variable */
 
-  struct measurement measurements[NUM_HISTOGRAMS]; 
+  struct measurement measurements[NUM_HISTOGRAMS];
   double dist;
 
   /* Compare current texton histogram to all saved histograms for
@@ -232,7 +250,7 @@ struct measurement predict_position(int *texton_hist) {
     z.y = all_positions[h].y;
     z.dist = dist;
     measurements[h] = z;
-    
+
   }
     /* Sort distances */
   /* qsort(measurements, sizeof(measurements) / sizeof(*measurements), sizeof(*measurements), measurement_comp); */
