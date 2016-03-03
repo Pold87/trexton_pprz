@@ -33,8 +33,8 @@
 
 /* The video device size (width, height) */
 #ifndef TREXTON_DEVICE_SIZE
-/* #define TREXTON_DEVICE_SIZE 320,240     ///< The video device size (width, height) */
-#define TREXTON_DEVICE_SIZE 1280, 720     ///< The video device size (width, height)
+#define TREXTON_DEVICE_SIZE 320,240     ///< The video device size (width, height)
+/* #define TREXTON_DEVICE_SIZE 1280, 720     ///< The video device size (width, height) */
 #endif
 
 /* The video device buffers (the amount of V4L2 buffers) */

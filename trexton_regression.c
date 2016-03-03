@@ -183,6 +183,7 @@ void trexton_periodic() {
     struct opticflow_result_t temp_result;
 
     edgeflow_calc_frame(&opticflow, &temp_state, &img, &temp_result);
+    /* opticflow_calc_frame(&opticflow, &temp_state, &img, &temp_result); */
     printf("\n edgeflow result: x:%d y:%d\n", temp_result.flow_x, temp_result.flow_y);
 // Copy the result if finished
     pthread_mutex_lock(&opticflow_mutex);
@@ -190,8 +191,16 @@ void trexton_periodic() {
     opticflow_got_result = TRUE;
     pthread_mutex_unlock(&opticflow_mutex);
 
-    flow.x = opticflow_result.flow_x;
-    flow.y = opticflow_result.flow_y;
+    /*TODO: CHANGE X AND Y !!! */
+    /*TODO: CHANGE X AND Y !!! */;
+    /*TODO: CHANGE X AND Y !!! */;
+    /*TODO: CHANGE X AND Y !!! */;
+    /*TODO: CHANGE X AND Y !!! */;
+    /*TODO: CHANGE X AND Y !!! */;
+    /*TODO: CHANGE X AND Y !!! */
+
+    flow.y = 1.5 * opticflow_result.flow_x;
+    flow.x =  1.5 * opticflow_result.flow_y;
 
    }
 
@@ -204,9 +213,13 @@ void trexton_periodic() {
    printf("Raw: %f,%f\n", pos.x, pos.y);
    printf("Particle filter: %f,%f\n", p_forward.x, p_forward.y);
    FILE *fp_predictions;
+   FILE *fp_particle_filter;
    fp_predictions = fopen("predictions.csv", "a");
+   fp_particle_filter = fopen("particle_filter_preds.csv", "a");
+   fprintf(fp_particle_filter, "%f,%f\n", p_forward.x, p_forward.y);
    //fprintf(fp_predictions, "%d,%f,%f,%f\n", current_test_histogram, pos.x, pos.y, pos.dist);
    fclose(fp_predictions);
+   fclose(fp_particle_filter);
  #endif
 
    current_test_histogram++;
