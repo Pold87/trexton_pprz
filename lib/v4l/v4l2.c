@@ -36,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 #include <pthread.h>
+#include <readpng.h>
 
 #include "v4l2.h"
 
@@ -320,6 +321,26 @@ void v4l2_image_get(struct v4l2_device *dev, struct image_t *img)
   img->buf = dev->buffers[img_idx].buf;
   memcpy(&img->ts, &dev->buffers[img_idx].timestamp, sizeof(struct timeval));
 }
+
+
+
+
+void v4l2_image_get_png(struct v4l2_device *dev, char *filename, struct image_t *img)
+{
+  uint16_t img_idx = V4L2_IMG_NONE;
+
+  // Set the image
+  img->type = IMAGE_GRAYSCALE;
+  img->w = 320;
+  img->h = 240;
+  img->buf_idx = 0;
+  img->buf_size = 640 * 480;
+  uint8_t buf[640 * 480];
+  /* read_png_file(filename, buf); */
+  img->buf = buf;
+  memcpy(&img->ts, &dev->buffers[img_idx].timestamp, sizeof(struct timeval));
+}
+
 
 /**
  * Get the latest image and lock it (Thread safe, NON BLOCKING)

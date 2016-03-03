@@ -28,7 +28,7 @@
 
 /* The video device */
 #ifndef TREXTON_DEVICE
-#define TREXTON_DEVICE /dev/video2      ///< The video device
+#define TREXTON_DEVICE /dev/video0      ///< The video device
 #endif
 
 /* The video device size (width, height) */

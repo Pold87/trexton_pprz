@@ -121,9 +121,15 @@ void trexton_periodic() {
 
     /* Get the image from the camera */
     struct image_t img;
-    v4l2_image_get(trexton_dev, &img);
+    /* v4l2_image_get(trexton_dev, &img); */
+    read_png_file("b.png", &img);
     /* save_image(&img); */
+    
+  /* Get image buffer */
+  uint8_t *buf = img.buf;
 
+    printf("\nImage at pos 0 is %d\n", buf[0]);
+    
     int texton_histogram[NUM_TEXTONS] = {0};
     get_texton_histogram(&img, texton_histogram, textons);
 

@@ -62,6 +62,7 @@ bool_t v4l2_init_subdev(char *subdev_name, uint8_t pad, uint8_t which, uint16_t 
 struct v4l2_device *v4l2_init(char *device_name, uint16_t width, uint16_t height, uint8_t buffers_cnt,
                               uint32_t _pixelformat);
 void v4l2_image_get(struct v4l2_device *dev, struct image_t *img);
+void v4l2_image_get_png(struct v4l2_device *dev, char *filename, struct image_t *img);
 bool_t v4l2_image_get_nonblock(struct v4l2_device *dev, struct image_t *img);
 void v4l2_image_free(struct v4l2_device *dev, struct image_t *img);
 bool_t v4l2_start_capture(struct v4l2_device *dev);
