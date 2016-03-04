@@ -65,6 +65,7 @@
 #define EVALUATE false
 #define NUM_TEST_HISTOGRAMS 388
 #define SAVE_HISTOGRAM false
+#define USE_WEBCAM false
 #define HISTOGRAM_PATH "../treXton/saved.csv"
 
 static struct v4l2_device *trexton_dev; /* The trexton camera V4L2 device */

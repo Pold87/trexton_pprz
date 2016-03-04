@@ -126,6 +126,18 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
   // Copy the creation timestamp (stays the same)
   memcpy(&output->ts, &input->ts, sizeof(struct timeval));
 
+
+  if (input->type == IMAGE_GRAYSCALE) {
+
+     for (int i = 0; i < input->w * input->h; i++) {
+
+        dest[i] = source[i];
+
+     }
+  }
+
+  else {
+
   // Copy the pixels
   for (int y = 0; y < output->h; y++) {
     for (int x = 0; x < output->w; x++) {
@@ -135,6 +147,7 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
       *dest++ = *source;    // Y
       source += 2;
     }
+  }
   }
 }
 
