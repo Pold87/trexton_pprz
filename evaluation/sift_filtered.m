@@ -10,6 +10,7 @@ sift_unfiltered = sift_unfiltered(:, 2:3)
 opticalflow = csvread('/home/pold/Documents/Internship/treXton/opticalflow.csv')
 preds = csvread('/home/pold/Documents/Internship/treXton/predictions.csv')
 preds_multi = csvread('/home/pold/Documents/Internship/treXton/predictions_multi.csv')
+edgeflow = csvread('/home/pold/Downloads/particle_filter_preds.csv')
 preds2 = csvread('/home/pold/Documents/Internship/treXton/prediction_rf500.csv')
 sift_test_cross_unfiltered = csvread('/home/pold/Documents/Internship/datasets/board_test_2_pos.csv', 1)
 sift_test_cross_unfiltered = sift_test_cross_unfiltered(:, 2:3)
@@ -29,7 +30,7 @@ preds_lasso_filtered = csvread('/home/pold/Documents/Internship/particle_filter/
 % 
 % diff = sift(:, 2:3) - sift_filtered
 
-plot_complete(preds_lasso_filtered, preds, opticalflow)
-% plot_time(preds)
+plot_complete(preds_lasso_filtered, edgeflow, opticalflow)
+% plot_time(edgeflow)
 
 
