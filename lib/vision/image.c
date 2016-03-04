@@ -130,9 +130,7 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
   if (input->type == IMAGE_GRAYSCALE) {
 
      for (int i = 0; i < input->w * input->h; i++) {
-
         dest[i] = source[i];
-
      }
   }
 

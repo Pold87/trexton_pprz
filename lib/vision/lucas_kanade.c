@@ -116,6 +116,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 		{
 			//uint16_t p = i ;//* skip_points; - disabled until needed
 
+		  /* printf("points are: %d, %d\n", points[i].x, points[i].y); */
+		  
 			if (LVL == pyramid_level)
 			{
 				// Convert the point to a subpixel coordinate
@@ -235,7 +237,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			// If we tracked the point we update the index and the count
 			if (tracked) {
-				new_p++;
+			  new_p++;
 				(*points_cnt)++;
 			}
 		} // go through all points

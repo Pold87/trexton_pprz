@@ -18,7 +18,7 @@
 static char histogram_filename[] = "../treXton/mat_train_hists.csv";
 static char histogram_filename_testset[] = "../treXton/mat_test_hists.csv";
 static int histograms_testset[NUM_TEST_HISTOGRAMS][NUM_TEXTONS];
-static char position_filename[] = "../image_recorder/sift_playing_mat.csv";
+static char position_filename[] =  "../datasets/board_train_pos.csv";
 static int histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
 static struct measurement all_positions[NUM_HISTOGRAMS];
 static int regression_histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
@@ -48,6 +48,9 @@ void trexton_init() {
   read_textons_from_csv(textons, texton_filename);
 
 
+  /* Remove predictions file */
+  remove("particle_filter_preds.csv");
+
   // Set the opticflow state to 0
   opticflow_state.phi = 0;
   opticflow_state.theta = 0;
@@ -62,6 +65,12 @@ void trexton_init() {
     /* Read histograms */
     read_histograms_from_csv(regression_histograms, histogram_filename);
     read_positions_from_csv(all_positions, position_filename);
+
+    int h = 0;
+  for (h = 0; h < 10; h++) {
+    printf("all pos is %f\n", all_positions[h].x);
+  }
+
   #endif
 
   #if EVALUATE
@@ -122,10 +131,12 @@ void trexton_periodic() {
     int *texton_histogram = histograms_testset[current_test_histogram];
   #else
 
-    /* Get the image from the camera */
     struct image_t img;
-    /* v4l2_image_get(trexton_dev, &img); */
+  #if USE_WEBCAM
+    /* Get the image from the camera */
+    v4l2_image_get(trexton_dev, &img);
 
+  #else
     char image_path[256];
     sprintf(image_path, "../datasets/board_test/%d.png", image_num);
 
@@ -133,26 +144,22 @@ void trexton_periodic() {
     fflush(stdout);
 
     read_png_file(image_path, &img);
-    save_image(&img);
-
-  /* Get image buffer */
-  uint8_t *buf = img.buf;
+  #endif 
 
   int texton_histogram[NUM_TEXTONS] = {0};
   get_texton_histogram(&img, texton_histogram, textons);
-
   #endif
 
  #if SAVE_HISTOGRAM
     save_histogram(texton_histogram, HISTOGRAM_PATH);
  #elif PREDICT
-
    struct measurement pos;
+   pos.x = 0;
+   pos.y = 0;
+   pos.dist = 100;
 
    /* TreXton prediction */
-   pos = predict_position(texton_histogram);
-   printf("predicted position is: x: %f, y: %f dist: %f\n\n", pos.x, pos.y, pos.dist);
-
+   /* pos = predict_position(texton_histogram); */
    /* Optical flow prediction */
    /* TODO */
 
@@ -160,13 +167,11 @@ void trexton_periodic() {
    struct measurement flow;
 
    if (use_flow) {
-
     // Copy the state
     pthread_mutex_lock(&opticflow_mutex);
     struct opticflow_state_t temp_state;
     memcpy(&temp_state, &opticflow_state, sizeof(struct opticflow_state_t));
     pthread_mutex_unlock(&opticflow_mutex);
-
     // Do the optical flow calculation
     struct opticflow_result_t temp_result;
 
@@ -178,7 +183,7 @@ void trexton_periodic() {
     memcpy(&opticflow_result, &temp_result, sizeof(struct opticflow_result_t));
     opticflow_got_result = TRUE;
     pthread_mutex_unlock(&opticflow_mutex);
-
+    save_image(&img, "mainpic.csv");
     /*TODO: CHANGE X AND Y !!! */
     /*TODO: CHANGE X AND Y !!! */;
     /*TODO: CHANGE X AND Y !!! */;
@@ -187,18 +192,25 @@ void trexton_periodic() {
     /*TODO: CHANGE X AND Y !!! */;
     /*TODO: CHANGE X AND Y !!! */
 
-    flow.y = 1.5 * opticflow_result.flow_x;
-    flow.x =  1.5 * opticflow_result.flow_y;
+    /* flow.y =  2.5 * ((double) opticflow_result.flow_x) / 1000; */
+    /* flow.x =  - 2.5 * ((double) opticflow_result.flow_y) / 1000; */
+
+    flow.y =  2.5 * ((double) opticflow_result.flow_x);
+    flow.x =  2.5 * ((double) opticflow_result.flow_y);
+
+    /* flow.y =  - 1.5 * ((double) opticflow_result.flow_x); */
+    /* flow.x = -  1.5 * ((double) opticflow_result.flow_y); */
 
    }
 
+   printf("flow is %f", flow.x);
    particle_filter(particles, &pos, &flow, use_variance, use_flow);
 
    opticflow_got_result = FALSE;
 
 
    struct particle p_forward = weighted_average(particles, N);
-   printf("Raw: %f,%f\n", pos.x, pos.y);
+   /* printf("\nRaw: %f,%f\n", pos.x, pos.y); */
    printf("Particle filter: %f,%f\n", p_forward.x, p_forward.y);
    FILE *fp_predictions;
    FILE *fp_particle_filter;
@@ -246,6 +258,8 @@ struct measurement predict_position(int *texton_hist) {
   for (h = 0; h < NUM_HISTOGRAMS; h++) {
     dist = euclidean_dist_int(texton_hist, regression_histograms[h], NUM_TEXTONS);
 
+    /* printf("all pos is %f\n", all_positions[h].x); */
+    
     struct measurement z;
     z.x = all_positions[h].x;
     z.y = all_positions[h].y;
@@ -253,26 +267,23 @@ struct measurement predict_position(int *texton_hist) {
     measurements[h] = z;
 
   }
+
     /* Sort distances */
-  /* qsort(measurements, sizeof(measurements) / sizeof(*measurements), sizeof(*measurements), measurement_comp); */
+  qsort(measurements, sizeof(measurements) / sizeof(*measurements), sizeof(*measurements), measurement_comp);
 
-    /* int i; */
-    /* for (i = 0; i < NUM_HISTOGRAMS; i++) { */
-    /*   printf("Prediction is x: %f y: %f dist: %f\n", positions[i].x, positions[i].y, positions[i].dist);       */
-    /* } */
+    /* Return average over first positions for accurate regression: */
 
-    /* TODO: return average over first positions for accurate regression */
-
-    /* int k = 7, l; */
+    int k = 7, l;
     struct  measurement mean_pos;
     mean_pos.x = 0;
     mean_pos.y = 0;
     mean_pos.dist = 0;
-    /* for (l = 0; l < k; l++) { */
-    /*   mean_pos.x += measurements[l].x / k; */
-    /*   mean_pos.y += measurements[l].y / k; */
-    /*   mean_pos.dist += measurements[l].dist / k; */
-    /* } */
+    for (l = 0; l < k; l++) {
+      printf("measurement %f", measurements[l].x);
+      mean_pos.x += measurements[l].x / k;
+      mean_pos.y += measurements[l].y / k;
+      mean_pos.dist += measurements[l].dist / k;
+    }
 
   return mean_pos;
 }

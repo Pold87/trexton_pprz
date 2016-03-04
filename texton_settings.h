@@ -55,15 +55,15 @@
 #define PATCH_SIZE  5
 #define TOTAL_PATCH_SIZE 25
 #define NUM_TEXTONS 33
-#define MAX_TEXTONS 300
+#define MAX_TEXTONS 1000
 #define MAX_POSSIBLE_DIST 50000
 
 /* Maximum lines read from histogram CSV */
-#define NUM_HISTOGRAMS 585
+#define NUM_HISTOGRAMS 1950
 #define NUM_CLASSES 4
 #define PREDICT true
 #define EVALUATE false
-#define NUM_TEST_HISTOGRAMS 388
+#define NUM_TEST_HISTOGRAMS 190
 #define SAVE_HISTOGRAM false
 #define USE_WEBCAM false
 #define HISTOGRAM_PATH "../treXton/saved.csv"

@@ -156,7 +156,7 @@ void edgeflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_t
   result->vel_body_y = - vel_x;
 
 #if OPTICFLOW_DEBUG && OPTICFLOW_SHOW_FLOW
-  draw_edgeflow_img(img, edgeflow, displacement, *edge_hist_x)
+  draw_edgeflow_img(img, edgeflow, displacement, edge_hist_x);
 #endif
   // Increment and wrap current time frame
   current_frame_nr = (current_frame_nr + 1) % MAX_HORIZON;

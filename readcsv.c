@@ -57,13 +57,19 @@ void cb_write_to_position_arr(void *s, size_t i, void *arr) {
     return;
 
   /* Save in texton array */
-  struct position* pos_arr = (struct position*) arr;
+  struct measurement* pos_arr = (struct measurement*) arr;
   if (max_lines > 0) {
+    
+    /* printf("row is %d and col is %d", row, col); */
     
     /* the first column has the x coordinate */
     /* it is row - 1 because the header was skipped */
-    if (col == 1)
+    if (col == 1) {
     pos_arr[row - 1].x = atof(s);
+
+    /* printf("s is %f\n", atof(s)); */
+    }
+
 
     /* and the second one the y coordinate */
     if (col == 2)
@@ -160,13 +166,20 @@ uint8_t read_test_histograms_from_csv(int *histograms, char *filename) {
 }
 
 
- uint8_t read_positions_from_csv(struct position *positions, char *filename) {
+ uint8_t read_positions_from_csv(struct measurement *measurements, char *filename) {
    
   printf("[read_positions_from_csv] filename is \n%s\n", filename);
-  fflush(stdout); // Prints to screen or whatever your standard out is
+  fflush(stdout); 
+
   max_lines = NUM_HISTOGRAMS;
-  width = 3; /* CSV header is id, x, y */
-  uint8_t r = read_csv_into_array(positions, filename, cb_write_to_position_arr);
+  width = 4; /* CSV header is id, x, y, matches */
+  uint8_t r = read_csv_into_array(measurements, filename, cb_write_to_position_arr);
+
+  /* int i; */
+  /* for (i = 0; i < 100; i++) { */
+  /*   printf("pos in func is %f", positions[i].x); */
+  /* } */
+
 
   return r;
 

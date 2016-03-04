@@ -43,6 +43,9 @@
 #include "size_divergence.h"
 #include "linear_flow_fit.h"
 
+
+#include "texton_helpers.h"
+
 // What methods are run to determine divergence, lateral flow, etc.
 // SIZE_DIV looks at line sizes and only calculates divergence
 #define SIZE_DIV 1
@@ -134,11 +137,12 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
   opticflow->prev_theta = 0.0;
 
   /* Set the default values */
-  opticflow->max_track_corners = OPTICFLOW_MAX_TRACK_CORNERS;
-  opticflow->window_size = OPTICFLOW_WINDOW_SIZE;
-  opticflow->subpixel_factor = OPTICFLOW_SUBPIXEL_FACTOR;
-  opticflow->max_iterations = OPTICFLOW_MAX_ITERATIONS;
-  opticflow->threshold_vec = OPTICFLOW_THRESHOLD_VEC;
+  opticflow->max_track_corners = 120; //OPTICFLOW_MAX_TRACK_CORNERS;
+  opticflow->window_size = 10;//OPTICFLOW_WINDOW_SIZE;
+  opticflow->subpixel_factor = 1000; //OPTICFLOW_SUBPIXEL_FACTOR;
+  opticflow->max_iterations = 20;//OPTICFLOW_MAX_ITERATIONS;
+  opticflow->threshold_vec = 3;// OPTICFLOW_THRESHOLD_VEC;
+  opticflow->pyramid_level = 2;
 
   opticflow->fast9_adaptive = OPTICFLOW_FAST9_ADAPTIVE;
   opticflow->fast9_threshold = OPTICFLOW_FAST9_THRESHOLD;
@@ -182,6 +186,7 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
   struct point_t *corners = fast9_detect(img, opticflow->fast9_threshold, opticflow->fast9_min_distance,
                                          20, 20, &result->corner_cnt);
 
+
   // Adaptive threshold
   if (opticflow->fast9_adaptive) {
 
@@ -196,7 +201,8 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
 #if OPTICFLOW_DEBUG && OPTICFLOW_SHOW_CORNERS
   image_show_points(img, corners, result->corner_cnt);
 #endif
-
+  save_image(img, "withpoints.csv");
+  
   // Check if we found some corners to track
   if (result->corner_cnt < 1) {
     free(corners);
@@ -210,9 +216,10 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
 
   // Execute a Lucas Kanade optical flow
   result->tracked_cnt = result->corner_cnt;
+
   struct flow_t *vectors = opticFlowLK(&opticflow->img_gray, &opticflow->prev_img_gray, corners, &result->tracked_cnt,
                                        opticflow->window_size / 2, opticflow->subpixel_factor, opticflow->max_iterations,
-                                       opticflow->threshold_vec, opticflow->max_track_corners);
+                                       opticflow->threshold_vec, opticflow->max_track_corners, opticflow->pyramid_level);
 
 #if OPTICFLOW_DEBUG && OPTICFLOW_SHOW_FLOW
   image_show_flow(img, vectors, result->tracked_cnt, opticflow->subpixel_factor);
@@ -250,6 +257,9 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
   // Get the median flow
   qsort(vectors, result->tracked_cnt, sizeof(struct flow_t), cmp_flow);
   if (result->tracked_cnt == 0) {
+
+    printf("\n\nNO FLOW !!!\nn");
+    
     // We got no flow
     result->flow_x = 0;
     result->flow_y = 0;

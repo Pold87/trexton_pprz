@@ -93,14 +93,14 @@ int max(int arr[], int size){
 }
 
 
-void save_image(struct image_t *img) {
+void save_image(struct image_t *img, char* filename) {
 
   int i;
 
   /* Get image buffer */
   uint8_t *buf = img->buf;
 
-  FILE *fp = fopen("myimage.csv", "w");
+  FILE *fp = fopen(filename, "w");
 
   uint32_t interlace;
   if (img->type == IMAGE_GRAYSCALE)
@@ -271,10 +271,14 @@ uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]){
   return id;
 }
 
-int measurement_comp (const struct measurement *elem1, const struct measurement *elem2)
+int measurement_comp (const void *elem1, const void *elem2)
 {
-  double f = elem1->dist;
-  double s =  elem2->dist;
+
+  struct measurement *m1 = (struct measurement *) elem1;
+  struct measurement *m2 = (struct measurement *) elem2;
+
+  double f = m1->dist;
+  double s =  m2->dist;
   if (f > s) return 1;
   if (f < s) return -1;
   return 0;
