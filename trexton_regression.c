@@ -129,31 +129,19 @@ void trexton_periodic() {
     char image_path[256];
     sprintf(image_path, "../datasets/board_test/%d.png", image_num);
 
-    /* image_path = "../datasets/board_test/1.png" */
-
     printf("%s", image_path);
     fflush(stdout);
 
-
-
     read_png_file(image_path, &img);
-    /* save_image(&img); */
+    save_image(&img);
 
   /* Get image buffer */
   uint8_t *buf = img.buf;
 
-    printf("\nImage at pos 0 is %d\n", buf[0]);
-
-    int texton_histogram[NUM_TEXTONS] = {0};
-    get_texton_histogram(&img, texton_histogram, textons);
+  int texton_histogram[NUM_TEXTONS] = {0};
+  get_texton_histogram(&img, texton_histogram, textons);
 
   #endif
-
-/* int i; */
-/*  for (i = 0; i < NUM_TEXTONS; i++) { */
-/*    printf("%d ", texton_histogram[i]); */
-/*  } */
-
 
  #if SAVE_HISTOGRAM
     save_histogram(texton_histogram, HISTOGRAM_PATH);

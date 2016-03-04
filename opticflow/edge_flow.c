@@ -110,22 +110,22 @@ void edgeflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_t
   struct timeval my_ts = img->ts;
 
   calculate_edge_displacement(edge_hist_x, prev_edge_histogram_x,
-                              displacement.x, size_w,
+                              displacement.x, img->w,
                               opticflow->window_size, disp_range,  der_shift_x);
 
 
   calculate_edge_displacement(edge_hist_y, prev_edge_histogram_y,
-                              displacement.y, size_h,
+                              displacement.y, img->h,
                               opticflow->window_size, disp_range, der_shift_y);
   
 
   // Fit a line on the pixel displacement to estimate
   // the global pixel flow and divergence (RES is resolution)
   line_fit(displacement.x, &edgeflow.div_x,
-           &edgeflow.flow_x, size_w,
+           &edgeflow.flow_x, img->w,
            opticflow->window_size + disp_range, RES);
   line_fit(displacement.y, &edgeflow.div_y,
-           &edgeflow.flow_y, size_h,
+           &edgeflow.flow_y, img->h,
            opticflow->window_size + disp_range, RES);
 
   // Save Resulting flow in results
