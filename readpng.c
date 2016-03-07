@@ -70,8 +70,6 @@ void read_png_file(char *filename, struct image_t *img) {
   png=NULL;
   info=NULL;
 
-  uint8_t buf[width * height];
-
   for(int y = 0; y < height; y++) {
     png_bytep row = row_pointers[y];
 
@@ -80,19 +78,13 @@ void read_png_file(char *filename, struct image_t *img) {
 
       int Y;
       Y = (6969 * px[0] + 23434 * px[1] + 2365 * px[2])/32768;
-
-      buf[y * width + x] = Y;
+      ((uint8_t*) img->buf)[y * width + x] = (uint8_t) Y;
 
     }
   }
 
   // Set the image
-  img->type = IMAGE_GRAYSCALE;
-  img->w = width;
-  img->h = height;
-  img->buf_idx = 0;
-  img->buf_size = width * height;
-  img->buf = buf;
+  /* img->buf_idx = 0; */
 
   fclose(fp);
 }

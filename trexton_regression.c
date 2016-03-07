@@ -16,7 +16,7 @@
 #include "opticflow/opticflow_calculator.h"
 
 static char histogram_filename[] = "../treXton/mat_train_hists.csv";
-static char histogram_filename_testset[] = "../treXton/mat_test_hists.csv";
+static char histogram_filename_testset[] = "../treXton/mat_test_hists_cross.csv";
 static int histograms_testset[NUM_TEST_HISTOGRAMS][NUM_TEXTONS];
 static char position_filename[] =  "../datasets/board_train_pos.csv";
 static int histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
@@ -25,7 +25,6 @@ static int regression_histograms[NUM_HISTOGRAMS][NUM_TEXTONS];
 static int current_test_histogram = 0;
 
 static int use_variance = 0;
-static int use_flow = 1;
 
 /* Create  particles */
 struct particle particles[N];
@@ -39,6 +38,8 @@ static bool_t opticflow_got_result; ///< When we have an optical flow calculatio
 
 static int image_num = 0;
 
+#define USE_FLOW true
+
 void trexton_init() {
 
 
@@ -50,6 +51,7 @@ void trexton_init() {
 
   /* Remove predictions file */
   remove("particle_filter_preds.csv");
+  remove("edgeflow_diff.csv");
 
   // Set the opticflow state to 0
   opticflow_state.phi = 0;
@@ -83,10 +85,13 @@ void trexton_init() {
     fprintf(fp_predictions, "id,x,y,dist\n");
     fclose(fp_predictions);
 
-  #else
+  #endif
 
     /* Initialize particles*/
+    printf("Init particles !!!\n\n");
+
     init_particles(particles);
+
 
     /* Debugging read poitions from csv */
     /* int i; */
@@ -116,7 +121,6 @@ void trexton_init() {
           -1,
           VIEWVIDEO_BROADCAST);
   #endif
-  #endif
 
 }
 
@@ -129,44 +133,54 @@ void trexton_periodic() {
 
   #if EVALUATE
     int *texton_histogram = histograms_testset[current_test_histogram];
-  #else
+  #endif
 
-    struct image_t img;
   #if USE_WEBCAM
     /* Get the image from the camera */
     v4l2_image_get(trexton_dev, &img);
 
   #else
+    struct image_t img;
+    image_create(&img, 320, 240, IMAGE_GRAYSCALE);
+
     char image_path[256];
-    sprintf(image_path, "../datasets/board_test/%d.png", image_num);
+    sprintf(image_path, "../datasets/board_test_2/%d.png", image_num);
 
     printf("%s", image_path);
     fflush(stdout);
 
     read_png_file(image_path, &img);
-  #endif 
 
-  int texton_histogram[NUM_TEXTONS] = {0};
-  get_texton_histogram(&img, texton_histogram, textons);
   #endif
+
+  /* int texton_histogram[NUM_TEXTONS] = {0}; */
+  /* get_texton_histogram(&img, texton_histogram, textons); */
+
+  int i;
+
+  for (i = 0; i < NUM_TEXTONS; i++) {
+     printf("%d ", texton_histogram[i]);
+
+  }
+  printf("\n");
+
 
  #if SAVE_HISTOGRAM
     save_histogram(texton_histogram, HISTOGRAM_PATH);
  #elif PREDICT
    struct measurement pos;
-   pos.x = 0;
-   pos.y = 0;
-   pos.dist = 100;
 
    /* TreXton prediction */
-   /* pos = predict_position(texton_histogram); */
+   pos = predict_position(texton_histogram);
+   /* save_image(&img, "afterpredict.csv"); */
+
    /* Optical flow prediction */
    /* TODO */
 
    /* Particle filter update */
    struct measurement flow;
 
-   if (use_flow) {
+   #if USE_FLOW
     // Copy the state
     pthread_mutex_lock(&opticflow_mutex);
     struct opticflow_state_t temp_state;
@@ -195,16 +209,21 @@ void trexton_periodic() {
     /* flow.y =  2.5 * ((double) opticflow_result.flow_x) / 1000; */
     /* flow.x =  - 2.5 * ((double) opticflow_result.flow_y) / 1000; */
 
-    flow.y =  2.5 * ((double) opticflow_result.flow_x);
-    flow.x =  2.5 * ((double) opticflow_result.flow_y);
+    flow.y =  1.7 * ((double) opticflow_result.flow_x);
+    flow.x =  1.7 * ((double) opticflow_result.flow_y);
 
     /* flow.y =  - 1.5 * ((double) opticflow_result.flow_x); */
     /* flow.x = -  1.5 * ((double) opticflow_result.flow_y); */
 
-   }
+   #endif
 
    printf("flow is %f", flow.x);
-   particle_filter(particles, &pos, &flow, use_variance, use_flow);
+
+   #if USE_FLOW
+     particle_filter(particles, &pos, &flow, use_variance, 1);
+   #else
+     particle_filter(particles, &pos, &flow, use_variance, 0);
+   #endif
 
    opticflow_got_result = FALSE;
 
@@ -214,12 +233,16 @@ void trexton_periodic() {
    printf("Particle filter: %f,%f\n", p_forward.x, p_forward.y);
    FILE *fp_predictions;
    FILE *fp_particle_filter;
+   FILE *fp_edge;
    fp_predictions = fopen("predictions.csv", "a");
    fp_particle_filter = fopen("particle_filter_preds.csv", "a");
+   fp_edge = fopen("edgeflow_diff.csv", "a");
+   fprintf(fp_edge, "%f,%f\n", flow.x, flow.y);
    fprintf(fp_particle_filter, "%f,%f\n", p_forward.x, p_forward.y);
    //fprintf(fp_predictions, "%d,%f,%f,%f\n", current_test_histogram, pos.x, pos.y, pos.dist);
    fclose(fp_predictions);
    fclose(fp_particle_filter);
+   fclose(fp_edge);
  #endif
 
    current_test_histogram++;
@@ -231,6 +254,7 @@ void trexton_periodic() {
   v4l2_image_free(trexton_dev, &img);
   #endif
 
+  image_free(&img);
 
   #endif
 
@@ -246,7 +270,7 @@ void trexton_periodic() {
  *
  * @return The x, y, position of the MAV, computed by means of the input histogram
  */
-struct measurement predict_position(int *texton_hist) {
+struct measurement predict_position(int texton_hist[]) {
 
   int h = 0; /* Histogram iterator variable */
 
@@ -273,13 +297,13 @@ struct measurement predict_position(int *texton_hist) {
 
     /* Return average over first positions for accurate regression: */
 
-    int k = 7, l;
+    int k = 3, l;
     struct  measurement mean_pos;
     mean_pos.x = 0;
     mean_pos.y = 0;
     mean_pos.dist = 0;
     for (l = 0; l < k; l++) {
-      printf("measurement %f", measurements[l].x);
+      printf("measurement %f", measurements[l].y);
       mean_pos.x += measurements[l].x / k;
       mean_pos.y += measurements[l].y / k;
       mean_pos.dist += measurements[l].dist / k;

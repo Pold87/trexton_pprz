@@ -79,7 +79,7 @@ void make_histogram(uint8_t *texton_ids, int *texton_hist);
 void save_histogram(int *texton_hist, char *filename);
 uint8_t label_image_patch(double *patch, double textons[][TOTAL_PATCH_SIZE]);
 uint8_t predict_class(int *texton_hist);
-struct measurement predict_position(int *texton_hist);
+struct measurement predict_position(int texton_hist[]);
 int measurement_comp (const void *elem1, const void *elem2);
 void save_image(struct image_t *img, char* filename);
 

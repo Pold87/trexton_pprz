@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 
-f = pd.read_csv("withpoints.csv")
+f = pd.read_csv("afterpredict.csv")
 
 plt.imshow(f, cmap=plt.get_cmap('gray'))
 plt.show()

@@ -62,8 +62,8 @@
 #define NUM_HISTOGRAMS 1950
 #define NUM_CLASSES 4
 #define PREDICT true
-#define EVALUATE false
-#define NUM_TEST_HISTOGRAMS 190
+#define EVALUATE true
+#define NUM_TEST_HISTOGRAMS 290
 #define SAVE_HISTOGRAM false
 #define USE_WEBCAM false
 #define HISTOGRAM_PATH "../treXton/saved.csv"

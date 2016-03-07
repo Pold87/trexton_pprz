@@ -39,9 +39,12 @@ double euclidean_dist(double x[], double y[], int s)
   uint8_t i;
   for(i = 0; i < s; i++)
     {
+       printf("%f ", x[i]);
+
       sum += pow((x[i] - y[i]), 2.0);
     }
       dist = sqrt(sum);
+      printf("\n");
   return dist;
 }
 
@@ -129,9 +132,6 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
 
   int total_patch_size = pow(patch_size, 2);
 
-  /* Get image buffer */
-  uint8_t *buf = img->buf;
-
   /* position of x, y */
   uint8_t interlace;
   if (img->type == IMAGE_GRAYSCALE) {
@@ -143,14 +143,13 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
        while (1);   // hang to show user something isn't right
   }
 
-
   int pos =  (x + (img->w * y)) * interlace;
 
   /* Extract patches  */
   for (int i = 0; i < total_patch_size; i++) {
 
     /* Assign pixel values */
-    patch[i] = buf[pos];
+     patch[i] = ((uint8_t *)img->buf)[pos];
 
     /* Check, if texton extraction should continue in a new line */
     if (i % patch_size == 0 && i != 0)
@@ -168,7 +167,7 @@ void extract_one_patch(struct image_t *img, double *patch, uint8_t x, uint8_t y,
 }
 
 /* Get the texton histogram of an image */
-void get_texton_histogram(struct image_t *img, int *texton_histogram, double textons[][TOTAL_PATCH_SIZE]) {
+void get_texton_histogram(struct image_t *img, int texton_histogram[], double textons[][TOTAL_PATCH_SIZE]) {
 
     uint8_t texton_ids[MAX_TEXTONS]; /*  texton IDs */
     double patch[total_patch_size];

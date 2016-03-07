@@ -223,7 +223,7 @@ void calculate_edge_histogram(struct image_t *img, int32_t edge_histogram[],
     // set values that are not visited
     edge_histogram[0] = edge_histogram[image_height - 1] = 0;
     for (y = 1; y < image_height - 1; y++) {
-      edge_histogram[y] = 0;
+    edge_histogram[y] = 0;
       for (x = 0; x < image_width; x++) {
         sobel_sum = 0;
 
